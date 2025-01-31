@@ -53,21 +53,21 @@ struct Bullet {
 
 void movement(Player& player, char key) {
 	switch (key) {
-	case 'a':
+	case 'a': // Ascii of it will be 97
 		gotoRowCol(player.position.x, player.position.y);
 		cout << ' ';
 		player.position.y--;
 		gotoRowCol(player.position.x, player.position.y);
 		cout << player.sym;
 		break;
-	case 'd':
+	case 'd':// Ascii of it will be 100
 		gotoRowCol(player.position.x, player.position.y);
 		cout << ' ';
 		player.position.y++;
 		gotoRowCol(player.position.x, player.position.y);
 		cout << player.sym;
 		break;
-	case 'w':
+	case 'w':// Ascii of it will be 119
 		for (int i = 0; i < 5; i++) {
 			gotoRowCol(player.position.x, player.position.y);
 			cout << ' ';
@@ -90,10 +90,10 @@ void movement(Player& player, char key) {
 		break;
 	}
 }
-void fire(Bullet& bullet, int key=32) {
+void fire(Bullet& bullet, int key) {
 
 	switch (key) {
-	case 32:
+	case 32:// Ascii of spacebar this is the reason on this function we use int key instead of char key
 		int i = 0;
 		while (i <= 20) {
 			gotoRowCol(bullet.position.x, bullet.position.y);
@@ -120,10 +120,10 @@ int main() {
 		if (_kbhit())
 		{
 			char key = _getch(); 
-			movement(player, key);
+			//movement(player, key);
 			bullet.position.x = player.position.x;
 			bullet.position.y = player.position.y + 1 ;
-			fire(bullet, key);
+			//fire(bullet, key);
 
 		}
 	}while (true);
