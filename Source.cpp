@@ -2,6 +2,7 @@
 #include<windows.h>
 #include<conio.h>
 #include<math.h>
+#define SLEEP 50
 using namespace std;
 
 void getRowColbyLeftClick(int& rpos, int& cpos)
@@ -45,9 +46,12 @@ struct Player {
 	Position position;
 	char sym = -37;
 };
+struct Bullet {
+	Position position;
+	char sym = -37;
+};
 
 void movement(Player& player, char key) {
-	int sleep = 50;
 	switch (key) {
 	case 'a':
 		gotoRowCol(player.position.x, player.position.y);
@@ -68,24 +72,47 @@ void movement(Player& player, char key) {
 			gotoRowCol(player.position.x, player.position.y);
 			cout << ' ';
 			player.position.x--;
-			Sleep(sleep);
+			Sleep(SLEEP);
 			gotoRowCol(player.position.x, player.position.y);
 			cout << player.sym;
 		}
 		for (int i = 0; i < 5; i++) {
 			gotoRowCol(player.position.x, player.position.y);
 			cout << ' ';
-			Sleep(sleep);
+			Sleep(SLEEP);
 			player.position.x++;
 			gotoRowCol(player.position.x, player.position.y);
 			cout << player.sym;
 		}
 		break;
+
+	default:
+		break;
 	}
+}
+void fire(Bullet& bullet, int key=32) {
+
+	switch (key) {
+	case 32:
+		int i = 0;
+		while (i <= 20) {
+			gotoRowCol(bullet.position.x, bullet.position.y);
+			cout << ' ';
+			bullet.position.y++;
+			Sleep(SLEEP);
+			gotoRowCol(bullet.position.x, bullet.position.y);
+			cout << bullet.sym;
+			i++;
+		}
+		gotoRowCol(bullet.position.x, bullet.position.y);
+		cout << " ";
+		break;
+	}
+
 }
 int main() {
 	Player player;
-	
+	Bullet bullet;
 	gotoRowCol(player.position.x, player.position.y);
 	cout << player.sym;
 
@@ -94,6 +121,10 @@ int main() {
 		{
 			char key = _getch(); 
 			movement(player, key);
+			bullet.position.x = player.position.x;
+			bullet.position.y = player.position.y + 1 ;
+			fire(bullet, key);
+
 		}
 	}while (true);
 	
