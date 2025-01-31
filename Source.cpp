@@ -3,6 +3,7 @@
 #include<conio.h>
 #include<math.h>
 #define SLEEP 50
+
 using namespace std;
 
 void getRowColbyLeftClick(int& rpos, int& cpos)
@@ -46,10 +47,21 @@ struct Player {
 	Position position;
 	char sym = -37;
 	int lives = 5;
+	bool isJump = false;
+	bool isAscending = false;
+	int jumpProgress = 0;
+	int jumpHeight = 5;
 };
 struct Bullet {
 	Position position;
 	char sym = -37;
+	
+};
+struct Enemy {
+	Position position;
+	char sym = -37;
+	bool isAlive = false;
+	Position target;
 };
 
 void movement(Player& player, char key) {
@@ -69,7 +81,7 @@ void movement(Player& player, char key) {
 		cout << player.sym;
 		break;
 	case 'w':// Ascii of it will be 119
-		for (int i = 0; i < 5; i++) {
+	/*	for (int i = 0; i < 5; i++) {
 			gotoRowCol(player.position.x, player.position.y);
 			cout << ' ';
 			player.position.x--;
@@ -84,17 +96,20 @@ void movement(Player& player, char key) {
 			player.position.x++;
 			gotoRowCol(player.position.x, player.position.y);
 			cout << player.sym;
+		}*/
+		if (!player.isJump) {
+			player.isJump = true;
+			player.isAscending = true;
 		}
+
 		break;
 
 	default:
 		break;
 	}
 }
-void fire(Bullet& bullet, int key) {
+void fire(Bullet& bullet) {
 
-	switch (key) {
-	case 32:// Ascii of spacebar this is the reason on this function we use int key instead of char key
 		int i = 0;
 		while (i <= 20) {
 			gotoRowCol(bullet.position.x, bullet.position.y);
@@ -107,37 +122,73 @@ void fire(Bullet& bullet, int key) {
 		}
 		gotoRowCol(bullet.position.x, bullet.position.y);
 		cout << " ";
-		break;
-	}
-
-}
-void enemy(Player& enemy_man , Player player) {
 	
-	enemy_man.position.x = 50;
-	enemy_man.position.y = 60+rand() % (100-60);
+}
+void handleJump(Player& player) {
 
-	while (enemy_man.position.y != player.position.y) {
-		gotoRowCol(enemy_man.position.x, enemy_man.position.y);
-		cout << ' ';
-		enemy_man.position.y--;
-		gotoRowCol(enemy_man.position.x, enemy_man.position.y);
-		cout << enemy_man.sym;
-		Sleep(SLEEP);
-		if (enemy_man.position.y == player.position.y) {
-			player.lives--;
-			gotoRowCol(enemy_man.position.x, enemy_man.position.y);
-				cout << " ";
-				break;
+	if (player.isJump) {
+
+		gotoRowCol(player.position.x, player.position.y);
+		cout << " ";
+
+		if (player.isAscending) {
+			player.position.x--;
+			player.jumpProgress++;
+
+			if (player.jumpProgress >= player.jumpHeight) {
+				player.isAscending = false;
+			}
+		}
+		else {
+			player.position.x++;
+			player.jumpProgress++;
+
+			if (player.jumpProgress >= player.jumpHeight * 2) {
+				player.isJump = false;
+				player.jumpProgress = 0;
+			}
 		}
 	}
+	gotoRowCol(player.position.x, player.position.y);
+	cout << player.sym;
 }
+void updateEnemy(Enemy& enemy , Player& player , int& i) {
+	//enemy.target = player.position;
+
+	if (!enemy.isAlive) {
+		
+		if (i == 0) {
+		enemy.position.x = 50;
+		enemy.position.y = 60 + rand() % (100 - 60);
+		}
+
+		gotoRowCol(enemy.position.x, enemy.position.y);
+		cout << " ";
+
+		if (player.position.y > enemy.position.y)
+			enemy.position.y++;
+		else
+			enemy.position.y--;
+
+		gotoRowCol(enemy.position.x, enemy.position.y);
+		cout << enemy.sym;
+
+		if (enemy.position.x == player.position.x and enemy.position.y == player.position.y)
+			enemy.isAlive = true;
+
+		i++;
+	}
+
+	
+}
+
 int main() {
 	Player player;
-	Player enemy_man;
+	Enemy enemyMan;
 	Bullet bullet;
 	gotoRowCol(player.position.x, player.position.y);
 	cout << player.sym;
-
+	int i = 0;
 	do {
 		if (_kbhit())
 		{
@@ -145,9 +196,12 @@ int main() {
 			movement(player, key);
 			bullet.position.x = player.position.x;
 			bullet.position.y = player.position.y + 1 ;
-			fire(bullet, key);
-			enemy(enemy_man, player);
+			if(key==32)
+				fire(bullet);
 		}
+		 updateEnemy(enemyMan, player, i);
+		 handleJump(player);
+		 Sleep(SLEEP);
 	}while (true);
 	
 	return 0;
