@@ -87,7 +87,7 @@ void movement(Player& player, char key) {
 }
 int main() {
 	Player player;
-	cout << "hehe" << endl;
+	
 	gotoRowCol(player.position.x, player.position.y);
 	cout << player.sym;
 
