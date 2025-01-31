@@ -2,9 +2,7 @@
 #include<windows.h>
 #include<conio.h>
 #include<math.h>
-
 using namespace std;
-
 
 void getRowColbyLeftClick(int& rpos, int& cpos)
 {
@@ -102,3 +100,6 @@ int main() {
 	return 0;
 	
 }
+
+
+
