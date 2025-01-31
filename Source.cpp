@@ -45,6 +45,7 @@ struct Position {
 struct Player {
 	Position position;
 	char sym = -37;
+	int lives = 5;
 };
 struct Bullet {
 	Position position;
@@ -110,8 +111,29 @@ void fire(Bullet& bullet, int key) {
 	}
 
 }
+void enemy(Player& enemy_man , Player player) {
+	
+	enemy_man.position.x = 50;
+	enemy_man.position.y = 60+rand() % (100-60);
+
+	while (enemy_man.position.y != player.position.y) {
+		gotoRowCol(enemy_man.position.x, enemy_man.position.y);
+		cout << ' ';
+		enemy_man.position.y--;
+		gotoRowCol(enemy_man.position.x, enemy_man.position.y);
+		cout << enemy_man.sym;
+		Sleep(SLEEP);
+		if (enemy_man.position.y == player.position.y) {
+			player.lives--;
+			gotoRowCol(enemy_man.position.x, enemy_man.position.y);
+				cout << " ";
+				break;
+		}
+	}
+}
 int main() {
 	Player player;
+	Player enemy_man;
 	Bullet bullet;
 	gotoRowCol(player.position.x, player.position.y);
 	cout << player.sym;
@@ -120,11 +142,11 @@ int main() {
 		if (_kbhit())
 		{
 			char key = _getch(); 
-			//movement(player, key);
+			movement(player, key);
 			bullet.position.x = player.position.x;
 			bullet.position.y = player.position.y + 1 ;
-			//fire(bullet, key);
-
+			fire(bullet, key);
+			enemy(enemy_man, player);
 		}
 	}while (true);
 	
