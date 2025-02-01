@@ -163,7 +163,7 @@ void getRowColbyLeftClick(int& rpos, int& cpos)
  		gotoRowCol(enemy.position.x, enemy.position.y);
  		cout << enemy.sym;
  
- 		if (enemy.position.x == player.position.x and enemy.position.y == player.position.y)
+ 		if (enemy.position.x == player.position.x && enemy.position.y == player.position.y)
  			enemy.isAlive = true;
  
  		i++;
@@ -175,7 +175,7 @@ void getRowColbyLeftClick(int& rpos, int& cpos)
  
  		gotoRowCol(bullet.position.x, bullet.position.y);
  		cout << " ";
- 	if (!bullet.isFired and bullet.distanceProgress< 21) {
+ 	if (!bullet.isFired && bullet.distanceProgress< 21) {
  
  		if (bullet.distanceProgress <= bullet.maxDistance) {
  			bullet.position.y++;
@@ -206,7 +206,7 @@ void getRowColbyLeftClick(int& rpos, int& cpos)
  		{
  			char key = _getch(); 
  			movement(player, key);
- 			if (key == 32 and bullet.distanceProgress==0) {
+ 			if (key == 32 && bullet.distanceProgress==0) {
  			bullet.position.x = player.position.x;
  			bullet.position.y = player.position.y + 1 ;
  			fire(bullet,player);
