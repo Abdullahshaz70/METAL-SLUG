@@ -26,5 +26,11 @@
     <Image Include="x64\Debug\background.jpg">
       <Filter>Source Files</Filter>
     </Image>
+    <Image Include="x64\Debug\Walter.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="x64\Debug\bullet.png">
+      <Filter>Source Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

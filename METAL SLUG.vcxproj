@@ -140,7 +140,9 @@
   </ItemGroup>
   <ItemGroup>
     <Image Include="x64\Debug\background.jpg" />
+    <Image Include="x64\Debug\bullet.png" />
     <Image Include="x64\Debug\player.png" />
+    <Image Include="x64\Debug\Walter.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
