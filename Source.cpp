@@ -160,6 +160,9 @@ int main()
             bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
             bullet_array[i].position.x = player.position.x;
             bullet_array[i].position.y = player.position.y - 50;
+
+            bullet_array[i].collider.x = bullet_array[i].position.x;
+            bullet_array[i].collider.y = bullet_array[i].position.y;
     }
 
   
@@ -169,7 +172,10 @@ int main()
         for (int i = 0; i < maxBullets; i++) {               
             if (!bullet_array[i].isFired) {
                 bullet_array[i].position.x = player.position.x ;
-                bullet_array[i].position.y = player.position.y - 50; ;
+                bullet_array[i].position.y = player.position.y - 50; 
+
+                bullet_array[i].collider.x = bullet_array[i].position.x;
+                bullet_array[i].collider.y = bullet_array[i].position.y;
             }
         }
      
@@ -198,9 +204,12 @@ int main()
         if (coolDown < 0)
             coolDown = 0;
  
-        for (int i = 0; i < maxBullets; i++) 
+        for (int i = 0; i < maxBullets; i++) {
             fireHandle(&bullet_array[i]);
        
+        bullet_array[i].collider.x = bullet_array[i].position.x;
+        bullet_array[i].collider.y = bullet_array[i].position.y;
+        }
         //-------------------------------------------------------------
         
    
@@ -216,6 +225,10 @@ int main()
         for (int i = 0; i < maxBullets; i++) {
             if (bullet_array[i].isFired) {
                 DrawTexture(bullet_array[i].texture, bullet_array[i].position.x, bullet_array[i].position.y, WHITE);
+
+                DrawRectangleLines((bullet_array[i].collider.x + bullet_array[i].width / 2) - 13 ,
+                    (bullet_array[i].collider.y + bullet_array[i].height/2) -13
+                    , 13 , 13, RED);
             }
         }
         DrawTexture(player.texture, player.position.x, player.position.y,WHITE);
