@@ -30,6 +30,7 @@ struct Bullet {
     bool isFired = false;
     int fireProgress = 0;
     int direction;
+    Rectangle collider;
 };
 Bullet bullet_array[maxBullets];   // ye array hai taake zada bullets store ho sakein
 struct Enemy {
@@ -58,6 +59,7 @@ void movement(Player* player, int key)
         player->isAscending = true;
 
     }
+
 }
 void jumpHandle(Player* player) {
 
@@ -81,11 +83,14 @@ void jumpHandle(Player* player) {
     }
 }
 
+
+
 //ye us true value ke liye work karta hai
 void fireHandle(Bullet* bullet) {
     if (bullet->isFired) {
         if (bullet->direction == 0) { // Move right
             bullet->position.x += 5;
+          
             bullet->fireProgress += 5;
 
             if (bullet->fireProgress >= screenWidth - 200) {
@@ -95,6 +100,7 @@ void fireHandle(Bullet* bullet) {
         }
         else if (bullet->direction == 1) { // Move up
             bullet->position.y -= 5;
+          
             bullet->fireProgress += 5;
 
             if (bullet->fireProgress >= screenHeight - 100) {
@@ -116,11 +122,21 @@ void shootBullet(int direction) {
     }
 }
 
+
 int main()
 {
     srand(time(0));
     Player player;
     Enemy enemy_busTank;
+    Bullet bullet;
+
+    Rectangle playercollider = {player.position.x , player.position.y , player.playerHeight , player.playerWidth};
+  
+    
+    playercollider.x = player.position.x;
+    playercollider.y = player.position.y;
+    playercollider.width = player.playerWidth;
+    playercollider.height = player.playerHeight;
 
     InitWindow(screenWidth, screenHeight, "METAL SLUG");
     SetTargetFPS(60);
@@ -146,7 +162,7 @@ int main()
             bullet_array[i].position.y = player.position.y - 50;
     }
 
-
+  
     while (!WindowShouldClose())    
     {   
        //update the bullet positions
@@ -156,9 +172,15 @@ int main()
                 bullet_array[i].position.y = player.position.y - 50; ;
             }
         }
+     
+
         if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
         if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
         if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
+
+        playercollider.x = player.position.x;
+        playercollider.y = player.position.y;
+   
         //-------------------------------------------------------------
         
         // All fire function
@@ -171,7 +193,7 @@ int main()
             
             coolDown = 7;
         }
-
+    
         coolDown--;
         if (coolDown < 0)
             coolDown = 0;
@@ -181,11 +203,14 @@ int main()
        
         //-------------------------------------------------------------
         
-      
+   
+        playercollider.x = player.position.x;
+        playercollider.y = player.position.y;
+     
         BeginDrawing();
         ClearBackground(RAYWHITE);
         DrawTexture(backGround,0,0,WHITE);
-      
+        DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
 
         //fire handle
         for (int i = 0; i < maxBullets; i++) {

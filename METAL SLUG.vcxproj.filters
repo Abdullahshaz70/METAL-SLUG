@@ -32,5 +32,11 @@
     <Image Include="x64\Debug\enemy.png">
       <Filter>Source Files</Filter>
     </Image>
+    <Image Include="x64\Debug\Mission 1 &amp; 2\Beach.png">
+      <Filter>Source Files</Filter>
+    </Image>
+    <Image Include="x64\Debug\Mission 1 &amp; 2\BG1.png">
+      <Filter>Source Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

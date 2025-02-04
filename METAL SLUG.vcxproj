@@ -142,6 +142,8 @@
     <Image Include="x64\Debug\background.jpg" />
     <Image Include="x64\Debug\bullet.png" />
     <Image Include="x64\Debug\enemy.png" />
+    <Image Include="x64\Debug\Mission 1 &amp; 2\Beach.png" />
+    <Image Include="x64\Debug\Mission 1 &amp; 2\BG1.png" />
     <Image Include="x64\Debug\player.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
