@@ -5,7 +5,6 @@
 const int screenWidth = 1280;
 const int screenHeight = 960;
 const int maxBullets = 10;
-
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
 
 
@@ -30,6 +29,7 @@ struct Bullet {
     int width=200;
     bool isFired = false;
     int fireProgress = 0;
+    int direction;
 };
 Bullet bullet_array[maxBullets];   // ye array hai taake zada bullets store ho sakein
 struct Enemy {
@@ -42,6 +42,7 @@ struct Enemy {
     int lives = 10;
     bool isAlived = false;
 };
+
 
 void movement(Player* player, int key)
 {
@@ -82,32 +83,38 @@ void jumpHandle(Player* player) {
 
 //ye us true value ke liye work karta hai
 void fireHandle(Bullet* bullet) {
-
-
     if (bullet->isFired) {
+        if (bullet->direction == 0) { // Move right
+            bullet->position.x += 5;
+            bullet->fireProgress += 5;
 
-        bullet->position.x +=  5;
-        bullet->fireProgress += 5;
-
-        if (bullet->fireProgress >= screenWidth - 200) {
-            bullet->isFired = false;
-            bullet->fireProgress = 0;
+            if (bullet->fireProgress >= screenWidth - 200) {
+                bullet->isFired = false;
+                bullet->fireProgress = 0;
+            }
         }
+        else if (bullet->direction == 1) { // Move up
+            bullet->position.y -= 5;
+            bullet->fireProgress += 5;
 
+            if (bullet->fireProgress >= screenHeight - 100) {
+                bullet->isFired = false;
+                bullet->fireProgress = 0;
+            }
+        }
     }
-
 }
 // ye function sirf us bullet ko true karta hai
-void shootBullet() {
-
+void shootBullet(int direction) {
     for (int i = 0; i < maxBullets; i++) {
         if (!bullet_array[i].isFired) {
             bullet_array[i].isFired = true;
             bullet_array[i].fireProgress = 0;
+            bullet_array[i].direction = direction;
             break;
         }
     }
-}                         
+}
 
 int main()
 {
@@ -139,43 +146,46 @@ int main()
             bullet_array[i].position.y = player.position.y - 50;
     }
 
- 
-   
+
     while (!WindowShouldClose())    
     {   
        //update the bullet positions
         for (int i = 0; i < maxBullets; i++) {               
-
             if (!bullet_array[i].isFired) {
                 bullet_array[i].position.x = player.position.x ;
                 bullet_array[i].position.y = player.position.y - 50; ;
             }
         }
-
         if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
         if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
         if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
-
         //-------------------------------------------------------------
         
         // All fire function
         if (IsKeyDown(KEY_X) and coolDown <= 0) {
-            shootBullet();
+            
+            if (IsKeyDown(KEY_UP)) 
+                shootBullet(1);
+            else 
+                shootBullet(0); 
+            
             coolDown = 7;
         }
+
         coolDown--;
         if (coolDown < 0)
             coolDown = 0;
-
-        for (int i = 0; i < maxBullets; i++)
+ 
+        for (int i = 0; i < maxBullets; i++) 
             fireHandle(&bullet_array[i]);
+       
         //-------------------------------------------------------------
         
       
         BeginDrawing();
         ClearBackground(RAYWHITE);
-
         DrawTexture(backGround,0,0,WHITE);
+      
 
         //fire handle
         for (int i = 0; i < maxBullets; i++) {
