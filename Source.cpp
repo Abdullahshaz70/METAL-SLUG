@@ -225,6 +225,10 @@ int main()
             if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
             if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
             if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
+            if (player.position.x < 0)
+                player.position.x = 0;
+            if (player.position.x > screenWidth - player.playerWidth)
+                player.position.x = screenWidth - player.playerWidth;
 
             //-------------------------------------------------------------
             if (coolDown > 0) {
