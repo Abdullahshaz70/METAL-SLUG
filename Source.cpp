@@ -93,7 +93,7 @@ void fireHandle(Bullet* bullet) {
           
             bullet->fireProgress += 5;
 
-            if (bullet->fireProgress >= screenWidth - 200) {
+            if (bullet->fireProgress >= screenWidth) {
                 bullet->isFired = false;
                 bullet->fireProgress = 0;
             }
@@ -103,7 +103,7 @@ void fireHandle(Bullet* bullet) {
           
             bullet->fireProgress += 5;
 
-            if (bullet->fireProgress >= screenHeight - 100) {
+            if (bullet->fireProgress >= screenHeight) {
                 bullet->isFired = false;
                 bullet->fireProgress = 0;
             }
@@ -144,6 +144,38 @@ bool mainMenu(Texture2D background,Sound Menu)
     return true;
 }
 
+void bulletLoading(Player &player)
+{
+    for (int i = 0; i < maxBullets; i++) {
+        bullet_array[i].img = LoadImage("x64/Debug/bullet.png");
+        ImageResize(&bullet_array[i].img, bullet_array[i].width, bullet_array[i].height);
+        bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
+        bullet_array[i].position.x = player.position.x;
+        bullet_array[i].position.y = player.position.y - 50;
+
+        bullet_array[i].collider.x = bullet_array[i].position.x;
+        bullet_array[i].collider.y = bullet_array[i].position.y;
+    }
+}
+void updateBulletPosition(Player& player)
+{
+    for (int i = 0; i < maxBullets; i++) {
+        if (!bullet_array[i].isFired) {
+            bullet_array[i].position.x = player.position.x;
+            bullet_array[i].position.y = player.position.y - 50;
+
+            bullet_array[i].collider.x = bullet_array[i].position.x;
+            bullet_array[i].collider.y = bullet_array[i].position.y;
+        }
+    }
+}
+void fire()
+{
+    if (IsKeyDown(KEY_UP))
+        shootBullet(1);
+    else
+        shootBullet(0);
+}
 
 int main()
 {
@@ -178,16 +210,7 @@ int main()
     Sound Stage1 = LoadSound("x64/Debug/Stage1.mp3");
 
     //bullet loading
-    for (int i = 0; i < maxBullets; i++) {
-            bullet_array[i].img = LoadImage("x64/Debug/bullet.png");
-            ImageResize(&bullet_array[i].img, bullet_array[i].width, bullet_array[i].height);
-            bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
-            bullet_array[i].position.x = player.position.x;
-            bullet_array[i].position.y = player.position.y - 50;
-
-            bullet_array[i].collider.x = bullet_array[i].position.x;
-            bullet_array[i].collider.y = bullet_array[i].position.y;
-    }
+    bulletLoading(player);
     
     if (!mainMenu(backGround,menu))
     {
@@ -196,52 +219,31 @@ int main()
         while (!WindowShouldClose())
         {
             //update the bullet positions
-            for (int i = 0; i < maxBullets; i++) {
-                if (!bullet_array[i].isFired) {
-                    bullet_array[i].position.x = player.position.x;
-                    bullet_array[i].position.y = player.position.y - 50;
+            updateBulletPosition(player);
 
-                    bullet_array[i].collider.x = bullet_array[i].position.x;
-                    bullet_array[i].collider.y = bullet_array[i].position.y;
-                }
-            }
-
-
+            //movement
             if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
             if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
             if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
 
-            playercollider.x = player.position.x;
-            playercollider.y = player.position.y;
-
             //-------------------------------------------------------------
-
+            if (coolDown > 0) {
+                coolDown--;
+            }
             // All fire function
             if (IsKeyDown(KEY_X) and coolDown <= 0) {
-
-                if (IsKeyDown(KEY_UP))
-                    shootBullet(1);
-                else
-                    shootBullet(0);
-
+                fire();
                 coolDown = 7;
             }
+            //-------------------------------------------------------------
 
-            coolDown--;
-            if (coolDown < 0)
-                coolDown = 0;
+
+            playercollider.x = player.position.x;
+            playercollider.y = player.position.y;
 
             for (int i = 0; i < maxBullets; i++) {
                 fireHandle(&bullet_array[i]);
-
-                bullet_array[i].collider.x = bullet_array[i].position.x;
-                bullet_array[i].collider.y = bullet_array[i].position.y;
             }
-            //-------------------------------------------------------------
-
-
-            playercollider.x = player.position.x;
-            playercollider.y = player.position.y;
 
             BeginDrawing();
             ClearBackground(RAYWHITE);
