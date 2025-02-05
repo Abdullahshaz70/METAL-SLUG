@@ -11,8 +11,8 @@ int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal 
 
 struct Player {
     Vector2 position;
-    Texture2D texture;
-    Image img;
+    Texture2D texture[13];
+    Image img[13];
 
     int playerWidth = 60;
     int playerHeight = 90;
@@ -21,7 +21,10 @@ struct Player {
     bool isAscending = false;
     int MAX_JUMP = 65;
     int jumpProgress = 0;
+    int moveProgress = 0;
+    bool isMoving = false;  
 };
+
 struct Bullet {
     Vector2 position = { 50,50 };
     Image img;
@@ -47,42 +50,88 @@ struct Enemy {
     Rectangle collider;
 };
 Enemy soldierEnemy[maxSoldierEnemy];
+int animationFrameCounter = 0;
+const int animationSpeed = 6;
 
-void movement(Player* player, int key)
-{
+void initillizePlayer(Player& player) {
+    player.position.x = 5;
+    player.position.y = 850;
+    player.img[0] = LoadImage("x64/Debug/player.png");
+    player.img[1] = LoadImage("x64/Debug/player1.png");
+    player.img[2] = LoadImage("x64/Debug/player2.png");
+    player.img[3] = LoadImage("x64/Debug/player3.png");
+    player.img[4] = LoadImage("x64/Debug/player4.png");
+    player.img[5] = LoadImage("x64/Debug/player5.png");
+    player.img[6] = LoadImage("x64/Debug/player6.png");
+    player.img[7] = LoadImage("x64/Debug/player7.png");
+    player.img[8] = LoadImage("x64/Debug/player8.png");
+    player.img[9] = LoadImage("x64/Debug/player9.png");
+    player.img[10] = LoadImage("x64/Debug/player10.png");
+    player.img[11] = LoadImage("x64/Debug/player11.png");
+    ImageResize(&player.img[0], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[1], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[2], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[3], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[4], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[5], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[6], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[7], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[8], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[9], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[10], player.playerWidth, player.playerHeight);
+    ImageResize(&player.img[11], player.playerWidth, player.playerHeight);
+    player.texture[0] = LoadTextureFromImage(player.img[0]);
+    player.texture[1] = LoadTextureFromImage(player.img[1]);
+    player.texture[2] = LoadTextureFromImage(player.img[2]);
+    player.texture[3] = LoadTextureFromImage(player.img[3]);
+    player.texture[4] = LoadTextureFromImage(player.img[4]);
+    player.texture[5] = LoadTextureFromImage(player.img[5]);
+    player.texture[6] = LoadTextureFromImage(player.img[6]);
+    player.texture[7] = LoadTextureFromImage(player.img[7]);
+    player.texture[8] = LoadTextureFromImage(player.img[8]);
+    player.texture[9] = LoadTextureFromImage(player.img[9]);
+    player.texture[10] = LoadTextureFromImage(player.img[10]);
+    player.texture[11] = LoadTextureFromImage(player.img[11]);
+}
+void initillizeBullet(Player player) {
+    for (int i = 0; i < maxBullets; i++) {
+        bullet_array[i].img = LoadImage("x64/Debug/bullet.png");
+        ImageResize(&bullet_array[i].img, bullet_array[i].width, bullet_array[i].height);
+        bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
+        bullet_array[i].position.x = player.position.x;
+        bullet_array[i].position.y = player.position.y - 50;
+        bullet_array[i].damage = 100;
 
-    if (key == KEY_LEFT) {
-        player->position.x -= player->speed;
-    }
-    if (key == KEY_RIGHT) {
-        player->position.x += player->speed;
-    }
-    if (key == KEY_Z) {
-        player->isJump = true;
-        player->isAscending = true;
-
+        bullet_array[i].collider.x = bullet_array[i].position.x;
+        bullet_array[i].collider.y = bullet_array[i].position.y;
     }
 
 }
-void jumpHandle(Player* player) {
+void initillizeSoldierEnemy() {
 
-    if (player->isJump) {
+    for (int i = 0; i < maxSoldierEnemy; i++) {
+        soldierEnemy[i].img = LoadImage("x64/Debug/enemy.png");
+        ImageResize(&soldierEnemy[i].img, soldierEnemy[i].width, soldierEnemy[i].height);
+        soldierEnemy[i].texture = LoadTextureFromImage(soldierEnemy[i].img);
 
-        player->position.y -= 5;
-        player->jumpProgress += 5;
+        soldierEnemy[i].position = { screenWidth, 857 };
+        soldierEnemy[i].health = 100;
+        soldierEnemy[i].isAlived = true;
+        soldierEnemy[i].speed = GetRandomValue(1, 4);
 
-        if (player->jumpProgress >= player->MAX_JUMP) {
 
-            player->isAscending = false;
-            player->isJump = false;
-            player->jumpProgress = 0;
-        }
-
+        soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
+        soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
     }
-    else {
 
-        if (player->position.y != 850)
-            player->position.y += 5;
+}
+void enemyDrawing()
+{
+    for (int i = 0; i < maxSoldierEnemy; i++) {
+        if (soldierEnemy[i].isAlived) {
+            DrawTexture(soldierEnemy[i].texture, (int)soldierEnemy[i].position.x, (int)soldierEnemy[i].position.y, WHITE);
+            DrawRectangleLines(soldierEnemy[i].collider.x, soldierEnemy[i].collider.y, soldierEnemy[i].width, soldierEnemy[i].height, PURPLE);
+        }
     }
 }
 
@@ -201,52 +250,45 @@ bool mainMenu(Texture2D background, Sound Menu)
     return true;
 }
 
-void initillizePlayer(Player& player) {
-    player.position.x = 5;
-    player.position.y = 850;
-    player.img = LoadImage("x64/Debug/player.png");
-    ImageResize(&player.img, player.playerWidth, player.playerHeight);
-    player.texture = LoadTextureFromImage(player.img);
-}
-void initillizeBullet(Player player) {
-    for (int i = 0; i < maxBullets; i++) {
-        bullet_array[i].img = LoadImage("x64/Debug/bullet.png");
-        ImageResize(&bullet_array[i].img, bullet_array[i].width, bullet_array[i].height);
-        bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
-        bullet_array[i].position.x = player.position.x;
-        bullet_array[i].position.y = player.position.y - 50;
-        bullet_array[i].damage = 100;
-
-        bullet_array[i].collider.x = bullet_array[i].position.x;
-        bullet_array[i].collider.y = bullet_array[i].position.y;
-    }
-
-}
-void initillizeSoldierEnemy() {
-
-    for (int i = 0; i < maxSoldierEnemy; i++) {
-        soldierEnemy[i].img = LoadImage("x64/Debug/enemy.png");
-        ImageResize(&soldierEnemy[i].img, soldierEnemy[i].width, soldierEnemy[i].height);
-        soldierEnemy[i].texture = LoadTextureFromImage(soldierEnemy[i].img);
-
-        soldierEnemy[i].position = { screenWidth, 857 };
-        soldierEnemy[i].health = 100;
-        soldierEnemy[i].isAlived = true;
-        soldierEnemy[i].speed = GetRandomValue(1, 4);
-
-
-        soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
-        soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
-    }
-
-}
-void enemyDrawing()
+bool movement(Player* player, int key)
 {
-    for (int i = 0; i < maxSoldierEnemy; i++) {
-        if (soldierEnemy[i].isAlived) {
-            DrawTexture(soldierEnemy[i].texture, (int)soldierEnemy[i].position.x, (int)soldierEnemy[i].position.y, WHITE);
-            DrawRectangleLines(soldierEnemy[i].collider.x, soldierEnemy[i].collider.y, soldierEnemy[i].width, soldierEnemy[i].height, PURPLE);
+    bool moved = false;
+    player->isMoving = false;
+    if (key == KEY_LEFT) {
+        player->position.x -= player->speed;
+        moved = true;
+        player->isMoving = true;
+    }
+    else if (key == KEY_RIGHT) {
+        player->position.x += player->speed;
+        moved = true;
+        player->isMoving = true;
+    }
+    else if (key == KEY_Z) {
+        player->isJump = true;
+        player->isAscending = true;
+    }
+    return moved;
+}
+void jumpHandle(Player* player) {
+
+    if (player->isJump) {
+
+        player->position.y -= 5;
+        player->jumpProgress += 5;
+
+        if (player->jumpProgress >= player->MAX_JUMP) {
+
+            player->isAscending = false;
+            player->isJump = false;
+            player->jumpProgress = 0;
         }
+
+    }
+    else {
+
+        if (player->position.y != 850)
+            player->position.y += 5;
     }
 }
 
@@ -353,7 +395,6 @@ void drawAllTextures(Texture2D backGround, Rectangle playercollider, Player play
     DrawTexture(backGround, 0, 0, WHITE);
     DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
     fireDraw();
-    DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
     enemyDrawing();
 }
 
@@ -375,6 +416,7 @@ int main()
     Image img1 = LoadImage("x64/Debug/background.jpg");
     ImageResize(&img1, screenWidth, screenHeight);
     Texture2D backGround = LoadTextureFromImage(img1);
+    
 
     Sound menu = LoadSound("x64/Debug/Menu.mp3");
     Sound Stage1 = LoadSound("x64/Debug/Stage1.mp3");
@@ -391,12 +433,13 @@ int main()
         {
             //update the bullet positions
             updateBullet(player);
-
-            if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
-            if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
-            if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
+            if (IsKeyDown(KEY_LEFT) and !movement(&player, KEY_LEFT))
+                player.moveProgress = 0;
+            if (IsKeyDown(KEY_RIGHT) and !movement(&player, KEY_RIGHT))
+                player.moveProgress = 0;
+            if (IsKeyDown(KEY_Z) and player.position.y == 850)
+                movement(&player, KEY_Z);
             moveOutsideScreen(player);
-
             //All fire function--------------------------------------------
             if (coolDown > 0) {
                 coolDown--;
@@ -417,18 +460,36 @@ int main()
                 fireHandle(&bullet_array[i]);
             }
             jumpHandle(&player);
-
+            if (player.moveProgress > 12)
+                player.moveProgress = 1;
             BeginDrawing();
             drawAllTextures(backGround, playercollider, player);
+            DrawTexture(player.texture[player.moveProgress], player.position.x, player.position.y, WHITE);
             EndDrawing();
+
+            animationFrameCounter++;
+            if (player.isMoving)
+            {
+                if (animationFrameCounter >= animationSpeed) {
+                    player.moveProgress++;
+                    if (player.moveProgress > 11)
+                        player.moveProgress = 0;
+                    animationFrameCounter = 0;
+                }
+            }
+            else
+            {
+                player.moveProgress = 0;
+                animationFrameCounter = 0;
+            }
         }
     }
 
     UnloadTexture(backGround);
-    UnloadImage(player.img);
-    UnloadTexture(player.texture);
+    UnloadImage(player.img[0]);
+    UnloadTexture(player.texture[0]);
     CloseAudioDevice();
     CloseWindow();
 
-    return 0;
+    return 0;
 }
