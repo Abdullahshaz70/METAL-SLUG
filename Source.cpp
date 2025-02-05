@@ -250,9 +250,9 @@ void enemyDrawing()
     }
 }
 
-float spawnTimer = 0.0f;  // Timer to control spawn interval
-float spawnInterval = 3.0f; // Time in seconds between each spawn
-int currentEnemyIndex = 0;  // To keep track of the next enemy to spawn
+float spawnTimer = 0.0f;  
+float spawnInterval = 3.0f;
+int currentEnemyIndex = 0;  
 
 void updatePosition(Rectangle& playercollider, Player& player) {
     playercollider.x = player.position.x;
@@ -413,9 +413,9 @@ int main()
 
             updatePosition(playercollider, player);
             //Fire Handling
-            for (int i = 0; i < maxBullets; i++) {
+            for (int i = 0; i < maxBullets; i++) 
                 fireHandle(&bullet_array[i]);
-            }
+            
             jumpHandle(&player);
 
             BeginDrawing();
@@ -430,5 +430,5 @@ int main()
     CloseAudioDevice();
     CloseWindow();
 
-    return 0;
+    return 0;
 }
