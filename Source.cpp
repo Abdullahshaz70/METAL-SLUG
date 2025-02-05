@@ -4,12 +4,16 @@
 #include<iostream>
 const int screenWidth = 1280;
 const int screenHeight = 960;
+
 const int maxBullets = 30;
 const int maxSoldierEnemy = 30;
+int ENEMY = 10;
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
+
 float spawnTimer = 0.0f;
 float spawnInterval = 5.0f;
 int currentEnemyIndex = 0;
+
 int animationFrameCounter = 0;
 const int animationSpeed = 6;
 
@@ -29,7 +33,6 @@ struct Player {
     int moveProgress = 0;
     bool isMoving = false;  
 };
-
 struct Bullet {
     Vector2 position = { 50,50 };
     Image img;
@@ -55,6 +58,16 @@ struct Enemy {
     Rectangle collider;
 };
 Enemy soldierEnemy[maxSoldierEnemy];
+
+struct Helicopter {
+    Image img;
+    Texture2D texture;
+    int height = 200;
+    int width = 250;
+    Vector2 position = {10 , 50};
+    int health = 100;
+
+};
 
 void initillizePlayer(Player& player) {
     player.position.x = 5;
@@ -137,7 +150,13 @@ void enemyDrawing()
         }
     }
 }
+void initillizeHelicopter(Helicopter& helicopter) {
 
+    helicopter.img = LoadImage("x64/Debug/helicopter.png");
+    ImageResize(&helicopter.img,helicopter.width, helicopter.height);
+    helicopter.texture= LoadTextureFromImage(helicopter.img);
+
+}
 
 void fireUpdate(Bullet* bullet) {
     if (bullet->isFired) {
@@ -363,6 +382,7 @@ void UpdateEnemies() {
                     if (soldierEnemy[i].health <= 10) {
                         soldierEnemy[i].isAlived = false;
                         bullet_array[j].isFired = false;
+                        ENEMY--;
                         /* soldierEnemy[i].collider = { 0 ,0 ,0 ,0 };*/
                         soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
                         soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
@@ -378,13 +398,19 @@ void UpdateEnemies() {
 
 
 
-void drawAllTextures(Texture2D backGround, Rectangle playercollider) {
+void drawAllTextures(Texture2D backGround, Rectangle playercollider ,
+    Rectangle helicoptercollider , Helicopter helicopter) {
 
     ClearBackground(RAYWHITE);
     DrawTexture(backGround, 0, 0, WHITE);
     DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
     fireDraw();
     enemyDrawing();
+    DrawRectangleLines(helicoptercollider.x, helicoptercollider.y, helicoptercollider.width, helicoptercollider.height, GREEN);
+
+    if (ENEMY <= 0)
+        DrawTexture(helicopter.texture, helicopter.position.x, helicopter.position.y, WHITE);
+
 }
 
 int main()
@@ -393,14 +419,19 @@ int main()
     Player player;
     Enemy enemy;
     Bullet bullet;
-    Rectangle playercollider = { player.position.x , player.position.y , player.playerWidth , player.playerHeight };
+    Helicopter helicopter;
 
+    Rectangle playercollider = { player.position.x , player.position.y , player.playerWidth , player.playerHeight };
+    Rectangle helicoptercollider = { helicopter.position.x , helicopter.position.y , helicopter.width , helicopter.height };
 
     InitWindow(screenWidth, screenHeight, "METAL SLUG");
     InitAudioDevice();
     SetTargetFPS(60);
 
     initillizePlayer(player);
+    initillizeHelicopter(helicopter);
+    initillizeBullet(player);
+    initillizeSoldierEnemy();
 
     Image img1 = LoadImage("x64/Debug/background.jpg");
     ImageResize(&img1, screenWidth, screenHeight);
@@ -409,10 +440,6 @@ int main()
 
     Sound menu = LoadSound("x64/Debug/Menu.mp3");
     Sound Stage1 = LoadSound("x64/Debug/Stage1.mp3");
-
-    initillizeBullet(player);
-
-    initillizeSoldierEnemy();
 
     if (!mainMenu(backGround, menu))
     {
@@ -456,8 +483,10 @@ int main()
           
             BeginDrawing();
 
-            drawAllTextures(backGround, playercollider);
+            drawAllTextures(backGround, playercollider , helicoptercollider , helicopter);
             DrawTexture(player.texture[player.moveProgress], player.position.x, player.position.y, WHITE);
+
+           
 
             EndDrawing();
 
