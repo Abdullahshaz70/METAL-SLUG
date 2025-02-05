@@ -4,11 +4,9 @@
 #include<iostream>
 const int screenWidth = 1280;
 const int screenHeight = 960;
-const int maxBullets = 10;
-const int maxSoldierEnemy = 10;
+const int maxBullets = 30;
+const int maxSoldierEnemy = 30;
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
-float spawnTimer = 0.0f;
-const float spawnInterval = 2.0f;
 
 
 struct Player {
@@ -33,10 +31,10 @@ struct Bullet {
     bool isFired = false;
     int fireProgress = 0;
     int direction;
+    int damage ;
     Rectangle collider;
 };
 Bullet bullet_array[maxBullets];  
-
 struct Enemy {
     Vector2 position;
     Texture2D texture;
@@ -161,13 +159,13 @@ void initillizeBullet(Player player) {
         bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
         bullet_array[i].position.x = player.position.x;
         bullet_array[i].position.y = player.position.y - 50;
+        bullet_array[i].damage = 100;
 
         bullet_array[i].collider.x = bullet_array[i].position.x;
         bullet_array[i].collider.y = bullet_array[i].position.y;
     }
 
 }
-
 void initillizeSoldierEnemy() {
 
     for (int i = 0; i < maxSoldierEnemy; i++) {
@@ -177,11 +175,20 @@ void initillizeSoldierEnemy() {
 
         soldierEnemy[i].position = { screenWidth, 857 };
         soldierEnemy[i].health = 100;
-        soldierEnemy[i].isAlived = false;
+        soldierEnemy[i].isAlived = true;
+        soldierEnemy[i].speed = GetRandomValue(1,4);
 
+
+        soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
+        soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
     }
 
 }
+
+float spawnTimer = 0.0f;  // Timer to control spawn interval
+float spawnInterval = 3.0f; // Time in seconds between each spawn
+int currentEnemyIndex = 0;  // To keep track of the next enemy to spawn
+
 
 void updateBullet(Player player) {
     for (int i = 0; i < maxBullets; i++) {
@@ -198,39 +205,86 @@ void updatePosition(Rectangle& playercollider , Player& player) {
     playercollider.x = player.position.x;
     playercollider.y = player.position.y;
 }
-
 void UpdateEnemies() {
 
-    spawnTimer += GetFrameTime();
+        
+      /*  for (int i = 0; i < maxSoldierEnemy ; i++) {
+            if (soldierEnemy[i].isAlived  ) {
+               
+              
 
-    if (spawnTimer >= spawnInterval) {
-        for (int i = 0; i < maxSoldierEnemy; i++) {
-            if (!soldierEnemy[i].isAlived) {
-             
-                soldierEnemy[i].isAlived = true;
-                soldierEnemy[i].speed = 5;
-                soldierEnemy[i].health = 100;
+                if(soldierEnemy[i].position.x > GetRandomValue(screenWidth / 2, screenWidth - 1))
+                    soldierEnemy[i].position.x -= soldierEnemy[i].speed;
+         
+                soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
+                soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
+
+
+                for (int i = 0; i < maxBullets; i++) {
+                    for (int j = 0; j < maxSoldierEnemy; j++) {
+
+                        if (bullet_array[i].collider.x == soldierEnemy[j].collider.x) {
+                           
+                            soldierEnemy[j].health -= bullet_array[i].damage;
+
+                            if (soldierEnemy[j].health <= 10) {
+                                soldierEnemy[j].isAlived = false;
+                                bullet_array[i].isFired = false; 
+                                soldierEnemy[j].collider = { 0 ,0 ,0 ,0 };
+                                
+
+                            }
+                        }
+                    }
+                }
+
+            }
+        }
+   */
       
-                spawnTimer = 0.0f;
-                break; 
+ 
+    for (int i = 0; i < maxSoldierEnemy; i++) {
+       
+        if (!soldierEnemy[i].isAlived && spawnTimer >= spawnInterval && currentEnemyIndex < maxSoldierEnemy) {
+           
+            spawnTimer = 0.0f;
+            soldierEnemy[i].position = { screenWidth, 857 };
+            soldierEnemy[i].health = 100;
+            soldierEnemy[i].isAlived = true;
+            soldierEnemy[i].speed = GetRandomValue(1, 4);
+            currentEnemyIndex++;
+        }
+
+       
+        if (soldierEnemy[i].isAlived) {
+           
+            if (soldierEnemy[i].position.x > screenWidth / 2) {
+                soldierEnemy[i].position.x -= soldierEnemy[i].speed;
+            }
+
+      
+            soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
+            soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
+
+    
+            for (int j = 0; j < maxBullets; j++) {
+                if (bullet_array[j].collider.x == soldierEnemy[i].collider.x) {
+                    soldierEnemy[i].health -= bullet_array[j].damage;
+
+                    if (soldierEnemy[i].health <= 10) {
+                        soldierEnemy[i].isAlived = false;
+                        bullet_array[j].isFired = false;
+                       /* soldierEnemy[i].collider = { 0 ,0 ,0 ,0 };*/
+                        soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
+                        soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
+                    }
+                }
             }
         }
     }
 
-    for (int i = 0; i < maxSoldierEnemy; i++) {
-        if (soldierEnemy[i].isAlived) {
-           
-            if(soldierEnemy[i].position.x > GetRandomValue(screenWidth / 2, screenWidth - 1))
-               soldierEnemy[i].position.x -= soldierEnemy[i].speed;
-         
-                 soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
-                 soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
-
-           /* else if (soldierEnemy[i].position.x < GetRandomValue(screenWidth / 2, screenWidth - 1))
-                soldierEnemy[i].position.x += soldierEnemy[i].speed;*/
-
-        }
-    }
+   
+    spawnTimer += GetFrameTime();  
 }
 
 
@@ -252,6 +306,7 @@ void drawAllTextures(Texture2D backGround, Rectangle playercollider, Player play
     }
 
     DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
+
     //enemy hande
     for (int i = 0; i < maxSoldierEnemy; i++) {
         if (soldierEnemy[i].isAlived) {
@@ -260,7 +315,6 @@ void drawAllTextures(Texture2D backGround, Rectangle playercollider, Player play
         }
     }
 }
-
 int main()
 {
     srand(time(0));
@@ -323,7 +377,9 @@ int main()
             }
             //-------------------------------------------------------------
 
+          
             UpdateEnemies();
+          
 
             updatePosition(playercollider, player);
             jumpHandle(&player);
