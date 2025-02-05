@@ -195,6 +195,15 @@ void fireDraw()
         }
     }
 }
+void drawEverything(Player& player,Texture2D backGround,Rectangle playercollider)
+{
+    ClearBackground(RAYWHITE);
+    DrawTexture(backGround, 0, 0, WHITE);
+    DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
+    fireDraw();
+    DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
+    jumpHandle(&player);
+}
 
 int main()
 {
@@ -268,12 +277,8 @@ int main()
 
             //Drawing ---------------------------------------------------------------------------------------------------
             BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawTexture(backGround, 0, 0, WHITE);
-            DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
-            fireDraw();
-            DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
-            jumpHandle(&player);
+
+            drawEverything(player, backGround, playercollider);
 
             EndDrawing();
             //-----------------------------------------------------------------------------------------------------------
