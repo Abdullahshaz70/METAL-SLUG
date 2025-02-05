@@ -5,8 +5,8 @@
 const int screenWidth = 1280;
 const int screenHeight = 960;
 const int maxBullets = 10;
+const int maxSoldierEnemy = 10;
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
-
 
 struct Player {
     Vector2 position;
@@ -32,20 +32,19 @@ struct Bullet {
     int direction;
     Rectangle collider;
 };
-
 Bullet bullet_array[maxBullets];  // ye array hai taake zada bullets store ho sakein
 
 struct Enemy {
     Vector2 position;
     Texture2D texture;
     Image img;
+    Vector2 speed;
     int Width = 135;
     int Height = 150;
-    float speed = 5.0f;
-    int lives = 10;
-    bool isAlived = false;
+    int health ;
+    bool isAlived ;
 };
-
+Enemy soldierEnemy[maxSoldierEnemy];  //// ye array hai taake zada enemy store ho sakein
 
 void movement(Player* player, int key)
 {
@@ -134,83 +133,109 @@ bool mainMenu(Texture2D background,Sound Menu)
         DrawText("Press S to Start or ESC to Exit", screenWidth / 2 - 210, screenHeight / 2 + 50, 24, BLACK);
         EndDrawing();
 
-        if (IsKeyPressed(KEY_S)) {
+        if (IsKeyPressed(KEY_S)) 
             return false;
-        }
-        if (IsKeyPressed(KEY_ESCAPE)) {
+
+        if (IsKeyPressed(KEY_ESCAPE)) 
             return true;
-        }
+        
     }
     return true;
 }
 
-
-int main()
-{
-    srand(time(0));
-    Player player;
-    Enemy enemy_busTank;
-    Bullet bullet;
-
-    Rectangle playercollider = {player.position.x , player.position.y , player.playerHeight , player.playerWidth};
-  
-    
-    playercollider.x = player.position.x;
-    playercollider.y = player.position.y;
-    playercollider.width = player.playerWidth;
-    playercollider.height = player.playerHeight;
-
-    InitWindow(screenWidth, screenHeight, "METAL SLUG");
-    InitAudioDevice();
-    SetTargetFPS(60);
-
-    player.position.x= 5;
+void initillizePlayer(Player& player) {
+    player.position.x = 5;
     player.position.y = 850;
     player.img = LoadImage("x64/Debug/player.png");
     ImageResize(&player.img, player.playerWidth, player.playerHeight);
     player.texture = LoadTextureFromImage(player.img);
-
-    Image img1 = LoadImage("x64/Debug/background.jpg");
-    ImageResize(&img1, screenWidth, screenHeight);
-    Texture2D backGround = LoadTextureFromImage(img1);
-
-    Sound menu = LoadSound("x64/Debug/Menu.mp3");
-
-    //bullet loading
+}
+void initillizeBullet(Player player) {
     for (int i = 0; i < maxBullets; i++) {
-            bullet_array[i].img = LoadImage("x64/Debug/bullet.png");
-            ImageResize(&bullet_array[i].img, bullet_array[i].width, bullet_array[i].height);
-            bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
+        bullet_array[i].img = LoadImage("x64/Debug/bullet.png");
+        ImageResize(&bullet_array[i].img, bullet_array[i].width, bullet_array[i].height);
+        bullet_array[i].texture = LoadTextureFromImage(bullet_array[i].img);
+        bullet_array[i].position.x = player.position.x;
+        bullet_array[i].position.y = player.position.y - 50;
+
+        bullet_array[i].collider.x = bullet_array[i].position.x;
+        bullet_array[i].collider.y = bullet_array[i].position.y;
+    }
+
+}
+
+void updateBullet(Player player) {
+    for (int i = 0; i < maxBullets; i++) {
+        if (!bullet_array[i].isFired) {
             bullet_array[i].position.x = player.position.x;
             bullet_array[i].position.y = player.position.y - 50;
 
             bullet_array[i].collider.x = bullet_array[i].position.x;
             bullet_array[i].collider.y = bullet_array[i].position.y;
+        }
     }
-    
+}
+
+void drawAllTextures(Texture2D backGround , Rectangle playercollider , Player player) {
+
+    ClearBackground(RAYWHITE);
+    DrawTexture(backGround, 0, 0, WHITE);
+    DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
+
+    //fire handle
+    for (int i = 0; i < maxBullets; i++) {
+        if (bullet_array[i].isFired) {
+            DrawTexture(bullet_array[i].texture, bullet_array[i].position.x, bullet_array[i].position.y, WHITE);
+
+            DrawRectangleLines((bullet_array[i].collider.x + bullet_array[i].width / 2) - 13,
+                (bullet_array[i].collider.y + bullet_array[i].height / 2) - 13
+                , 13, 13, RED);
+        }
+    }
+    DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
+
+}
+
+void updatePosition(Rectangle& playercollider , Player& player) {
+    playercollider.x = player.position.x;
+    playercollider.y = player.position.y;
+}
+
+int main()
+{
+    srand(time(0));
+    Player player;
+    Enemy enemy;
+    Bullet bullet;
+    Rectangle playercollider = {player.position.x , player.position.y , player.playerWidth , player.playerHeight};
+ 
+
+    InitWindow(screenWidth, screenHeight, "METAL SLUG");
+    InitAudioDevice();
+    SetTargetFPS(60);
+
+    initillizePlayer(player);
+
+    Image img1 = LoadImage("x64/Debug/background.jpg");
+    ImageResize(&img1, screenWidth, screenHeight);
+    Texture2D backGround = LoadTextureFromImage(img1);
+    Sound menu = LoadSound("x64/Debug/Menu.mp3");
+
+    initillizeBullet(player);
+
     if (!mainMenu(backGround,menu))
     {
         StopSound(menu);
         while (!WindowShouldClose())
         {
             //update the bullet positions
-            for (int i = 0; i < maxBullets; i++) {
-                if (!bullet_array[i].isFired) {
-                    bullet_array[i].position.x = player.position.x;
-                    bullet_array[i].position.y = player.position.y - 50;
-
-                    bullet_array[i].collider.x = bullet_array[i].position.x;
-                    bullet_array[i].collider.y = bullet_array[i].position.y;
-                }
-            }
-
+            updateBullet(player);
 
             if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
             if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
             if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
 
-            playercollider.x = player.position.x;
-            playercollider.y = player.position.y;
+            updatePosition(playercollider, player);
 
             //-------------------------------------------------------------
 
@@ -231,34 +256,16 @@ int main()
 
             for (int i = 0; i < maxBullets; i++) {
                 fireHandle(&bullet_array[i]);
-
                 bullet_array[i].collider.x = bullet_array[i].position.x;
                 bullet_array[i].collider.y = bullet_array[i].position.y;
             }
             //-------------------------------------------------------------
 
-
-            playercollider.x = player.position.x;
-            playercollider.y = player.position.y;
-
-            BeginDrawing();
-            ClearBackground(RAYWHITE);
-            DrawTexture(backGround, 0, 0, WHITE);
-            DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
-
-            //fire handle
-            for (int i = 0; i < maxBullets; i++) {
-                if (bullet_array[i].isFired) {
-                    DrawTexture(bullet_array[i].texture, bullet_array[i].position.x, bullet_array[i].position.y, WHITE);
-
-                    DrawRectangleLines((bullet_array[i].collider.x + bullet_array[i].width / 2) - 13,
-                        (bullet_array[i].collider.y + bullet_array[i].height / 2) - 13
-                        , 13, 13, RED);
-                }
-            }
-            DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
+            updatePosition(playercollider, player);
             jumpHandle(&player);
 
+            BeginDrawing();
+            drawAllTextures(backGround, playercollider, player);
             EndDrawing();
         }
     }
