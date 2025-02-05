@@ -4,7 +4,7 @@
 #include<iostream>
 const int screenWidth = 1280;
 const int screenHeight = 960;
-const int maxBullets = 10;
+const int maxBullets = 50;
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
 
 
