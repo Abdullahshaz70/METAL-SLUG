@@ -139,7 +139,7 @@ void enemyDrawing()
 }
 
 
-void fireHandle(Bullet* bullet) {
+void fireUpdate(Bullet* bullet) {
     if (bullet->isFired) {
         if (bullet->direction == 0) {
             bullet->position.x += 5;
@@ -420,8 +420,8 @@ int main()
         PlaySound(Stage1);
         while (!WindowShouldClose())
         {
-            //update the bullet positions
-            updateBullet(player);
+            
+         
             if (IsKeyDown(KEY_LEFT) and !movement(&player, KEY_LEFT))
                 player.moveProgress = 0;
             if (IsKeyDown(KEY_RIGHT) and !movement(&player, KEY_RIGHT))
@@ -442,19 +442,18 @@ int main()
 
 
             UpdateEnemies();
-
-
             updatePosition(playercollider, player);
-            //Fire Handling
+            updateBullet(player);
+            updatePlayerAnimation(player);
+            jumpHandle(&player);
             for (int i = 0; i < maxBullets; i++) 
-                fireHandle(&bullet_array[i]);
+                fireUpdate(&bullet_array[i]);
             
         
             if (player.moveProgress > 12)
                 player.moveProgress = 1;
 
-            updatePlayerAnimation(player);
-            jumpHandle(&player);
+          
             BeginDrawing();
 
             drawAllTextures(backGround, playercollider);
