@@ -175,6 +175,7 @@ int main()
     Texture2D backGround = LoadTextureFromImage(img1);
 
     Sound menu = LoadSound("x64/Debug/Menu.mp3");
+    Sound Stage1 = LoadSound("x64/Debug/Stage1.mp3");
 
     //bullet loading
     for (int i = 0; i < maxBullets; i++) {
@@ -191,6 +192,7 @@ int main()
     if (!mainMenu(backGround,menu))
     {
         StopSound(menu);
+        PlaySound(Stage1);
         while (!WindowShouldClose())
         {
             //update the bullet positions
