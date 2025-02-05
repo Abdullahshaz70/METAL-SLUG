@@ -287,6 +287,8 @@ int main()
 
     UnloadTexture(backGround);
     UnloadImage(player.img);
+    UnloadSound(menu);
+    UnloadSound(Stage1);
     UnloadTexture(player.texture);
     CloseAudioDevice();
     CloseWindow();
