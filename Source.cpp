@@ -7,6 +7,11 @@ const int screenHeight = 960;
 const int maxBullets = 30;
 const int maxSoldierEnemy = 30;
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
+float spawnTimer = 0.0f;
+float spawnInterval = 5.0f;
+int currentEnemyIndex = 0;
+int animationFrameCounter = 0;
+const int animationSpeed = 6;
 
 
 struct Player {
@@ -50,8 +55,6 @@ struct Enemy {
     Rectangle collider;
 };
 Enemy soldierEnemy[maxSoldierEnemy];
-int animationFrameCounter = 0;
-const int animationSpeed = 6;
 
 void initillizePlayer(Player& player) {
     player.position.x = 5;
@@ -135,10 +138,10 @@ void enemyDrawing()
     }
 }
 
-//ye us true value ke liye work karta hai
+
 void fireHandle(Bullet* bullet) {
     if (bullet->isFired) {
-        if (bullet->direction == 0) { // Move right
+        if (bullet->direction == 0) {
             bullet->position.x += 5;
             bullet->collider.x += 5;
             bullet->fireProgress += 5;
@@ -148,7 +151,7 @@ void fireHandle(Bullet* bullet) {
                 bullet->fireProgress = 0;
             }
         }
-        else if (bullet->direction == 1) { // Move up
+        else if (bullet->direction == 1) {
             bullet->position.y -= 5;
             bullet->collider.y -= 5;
 
@@ -227,7 +230,7 @@ void updateBullet(Player player) {
     }
 }
 
-// ye function main menu ke liye hai
+
 bool mainMenu(Texture2D background, Sound Menu)
 {
     PlaySound(Menu);
@@ -250,14 +253,17 @@ bool mainMenu(Texture2D background, Sound Menu)
     return true;
 }
 
+
 bool movement(Player* player, int key)
 {
+   
     bool moved = false;
     player->isMoving = false;
     if (key == KEY_LEFT) {
         player->position.x -= player->speed;
         moved = true;
         player->isMoving = true;
+
     }
     else if (key == KEY_RIGHT) {
         player->position.x += player->speed;
@@ -268,6 +274,7 @@ bool movement(Player* player, int key)
         player->isJump = true;
         player->isAscending = true;
     }
+
     return moved;
 }
 void jumpHandle(Player* player) {
@@ -291,51 +298,38 @@ void jumpHandle(Player* player) {
             player->position.y += 5;
     }
 }
-
-float spawnTimer = 0.0f;  
-float spawnInterval = 3.0f;
-int currentEnemyIndex = 0;  
-
 void updatePosition(Rectangle& playercollider, Player& player) {
     playercollider.x = player.position.x;
     playercollider.y = player.position.y;
 }
+void updatePlayerAnimation(Player& player) {
+    animationFrameCounter++;
+    if (player.isMoving)
+    {
+        if (animationFrameCounter >= animationSpeed) {
+            player.moveProgress++;
+            if (player.moveProgress > 11)
+                player.moveProgress = 0;
+            animationFrameCounter = 0;
+        }
+        player.isMoving = false;
+    }
+    else
+    {
+        player.moveProgress = 0;
+        animationFrameCounter = 0;
+    }
+}
+void moveOutsideScreen(Player& player)
+{
+    if (player.position.x < 0)
+        player.position.x = 0;
+    if (player.position.x > screenWidth - player.playerWidth)
+        player.position.x = screenWidth - player.playerWidth;
+}
+
+
 void UpdateEnemies() {
-
-
-    /*  for (int i = 0; i < maxSoldierEnemy ; i++) {
-          if (soldierEnemy[i].isAlived  ) {
-
-
-
-              if(soldierEnemy[i].position.x > GetRandomValue(screenWidth / 2, screenWidth - 1))
-                  soldierEnemy[i].position.x -= soldierEnemy[i].speed;
-
-              soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
-              soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
-
-
-              for (int i = 0; i < maxBullets; i++) {
-                  for (int j = 0; j < maxSoldierEnemy; j++) {
-
-                      if (bullet_array[i].collider.x == soldierEnemy[j].collider.x) {
-
-                          soldierEnemy[j].health -= bullet_array[i].damage;
-
-                          if (soldierEnemy[j].health <= 10) {
-                              soldierEnemy[j].isAlived = false;
-                              bullet_array[i].isFired = false;
-                              soldierEnemy[j].collider = { 0 ,0 ,0 ,0 };
-
-
-                          }
-                      }
-                  }
-              }
-
-          }
-      }
- */
 
 
     for (int i = 0; i < maxSoldierEnemy; i++) {
@@ -382,14 +376,9 @@ void UpdateEnemies() {
     spawnTimer += GetFrameTime();
 }
 
-void moveOutsideScreen(Player& player)
-{
-    if (player.position.x < 0)
-        player.position.x = 0;
-    if (player.position.x > screenWidth - player.playerWidth)
-        player.position.x = screenWidth - player.playerWidth;
-}
-void drawAllTextures(Texture2D backGround, Rectangle playercollider, Player player) {
+
+
+void drawAllTextures(Texture2D backGround, Rectangle playercollider) {
 
     ClearBackground(RAYWHITE);
     DrawTexture(backGround, 0, 0, WHITE);
@@ -439,16 +428,17 @@ int main()
                 player.moveProgress = 0;
             if (IsKeyDown(KEY_Z) and player.position.y == 850)
                 movement(&player, KEY_Z);
+
             moveOutsideScreen(player);
-            //All fire function--------------------------------------------
-            if (coolDown > 0) {
+
+       
+            if (coolDown > 0) 
                 coolDown--;
-            }
             if (IsKeyDown(KEY_X) and coolDown <= 0) {
                 fire();
-                coolDown = 7;
+                coolDown = 6;
             }
-            //-------------------------------------------------------------
+          
 
 
             UpdateEnemies();
@@ -459,29 +449,20 @@ int main()
             for (int i = 0; i < maxBullets; i++) 
                 fireHandle(&bullet_array[i]);
             
-            jumpHandle(&player);
+        
             if (player.moveProgress > 12)
                 player.moveProgress = 1;
+
+            updatePlayerAnimation(player);
+            jumpHandle(&player);
             BeginDrawing();
-            drawAllTextures(backGround, playercollider, player);
+
+            drawAllTextures(backGround, playercollider);
             DrawTexture(player.texture[player.moveProgress], player.position.x, player.position.y, WHITE);
+
             EndDrawing();
 
-            animationFrameCounter++;
-            if (player.isMoving)
-            {
-                if (animationFrameCounter >= animationSpeed) {
-                    player.moveProgress++;
-                    if (player.moveProgress > 11)
-                        player.moveProgress = 0;
-                    animationFrameCounter = 0;
-                }
-            }
-            else
-            {
-                player.moveProgress = 0;
-                animationFrameCounter = 0;
-            }
+
         }
     }
 
