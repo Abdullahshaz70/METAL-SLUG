@@ -84,6 +84,13 @@ void jumpHandle(Player* player) {
             player->position.y+=5;
     }
 }
+void moveOutsideScreen(Player& player)
+{
+    if (player.position.x < 0)
+        player.position.x = 0;
+    if (player.position.x > screenWidth - player.playerWidth)
+        player.position.x = screenWidth - player.playerWidth;
+}
 
 //ye us true value ke liye work karta hai
 void fireHandle(Bullet* bullet) {
@@ -176,6 +183,18 @@ void fire()
     else
         shootBullet(0);
 }
+void fireDraw()
+{
+    for (int i = 0; i < maxBullets; i++) {
+        if (bullet_array[i].isFired) {
+            DrawTexture(bullet_array[i].texture, bullet_array[i].position.x, bullet_array[i].position.y, WHITE);
+
+            DrawRectangleLines((bullet_array[i].collider.x + bullet_array[i].width / 2) - 13,
+                (bullet_array[i].collider.y + bullet_array[i].height / 2) - 13
+                , 13, 13, RED);
+        }
+    }
+}
 
 int main()
 {
@@ -221,53 +240,43 @@ int main()
             //update the bullet positions
             updateBulletPosition(player);
 
-            //movement
+            //movement-----------------------------------------------------------------
             if (IsKeyDown(KEY_LEFT))movement(&player, KEY_LEFT);
             if (IsKeyDown(KEY_RIGHT))movement(&player, KEY_RIGHT);
             if (IsKeyDown(KEY_Z) and player.position.y == 850)movement(&player, KEY_Z);
-            if (player.position.x < 0)
-                player.position.x = 0;
-            if (player.position.x > screenWidth - player.playerWidth)
-                player.position.x = screenWidth - player.playerWidth;
+            moveOutsideScreen(player);
+            //-------------------------------------------------------------------------
 
-            //-------------------------------------------------------------
+            // All fire function-------------------------------------------
             if (coolDown > 0) {
                 coolDown--;
             }
-            // All fire function
             if (IsKeyDown(KEY_X) and coolDown <= 0) {
                 fire();
                 coolDown = 7;
             }
             //-------------------------------------------------------------
 
-
+            //Player Collider Update
             playercollider.x = player.position.x;
             playercollider.y = player.position.y;
 
+            //Fire Handling
             for (int i = 0; i < maxBullets; i++) {
                 fireHandle(&bullet_array[i]);
             }
 
+            //Drawing ---------------------------------------------------------------------------------------------------
             BeginDrawing();
             ClearBackground(RAYWHITE);
             DrawTexture(backGround, 0, 0, WHITE);
             DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
-
-            //fire handle
-            for (int i = 0; i < maxBullets; i++) {
-                if (bullet_array[i].isFired) {
-                    DrawTexture(bullet_array[i].texture, bullet_array[i].position.x, bullet_array[i].position.y, WHITE);
-
-                    DrawRectangleLines((bullet_array[i].collider.x + bullet_array[i].width / 2) - 13,
-                        (bullet_array[i].collider.y + bullet_array[i].height / 2) - 13
-                        , 13, 13, RED);
-                }
-            }
+            fireDraw();
             DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
             jumpHandle(&player);
 
             EndDrawing();
+            //-----------------------------------------------------------------------------------------------------------
         }
     }
 
