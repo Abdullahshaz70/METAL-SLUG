@@ -91,7 +91,7 @@ void fireHandle(Bullet* bullet) {
     if (bullet->isFired) {
         if (bullet->direction == 0) { // Move right
             bullet->position.x += 5;
-
+            bullet->collider.x += 5;
             bullet->fireProgress += 5;
 
             if (bullet->fireProgress >= screenWidth) {
@@ -101,6 +101,7 @@ void fireHandle(Bullet* bullet) {
         }
         else if (bullet->direction == 1) { // Move up
             bullet->position.y -= 5;
+            bullet->collider.y -= 5;
 
             bullet->fireProgress += 5;
 
@@ -418,7 +419,7 @@ int main()
             jumpHandle(&player);
 
             BeginDrawing();
-            drawAllTextures(backGround,playercollider,player);
+            drawAllTextures(backGround, playercollider, player);
             EndDrawing();
         }
     }
