@@ -7,6 +7,9 @@ const int screenHeight = 960;
 const int maxBullets = 10;
 const int maxSoldierEnemy = 10;
 int coolDown = 0; // ye use kiya taake simultaneously bullets aik sath na nikal ayein , C++ tez hai zara
+float spawnTimer = 0.0f;
+const float spawnInterval = 2.0f;
+
 
 struct Player {
     Vector2 position;
@@ -32,19 +35,20 @@ struct Bullet {
     int direction;
     Rectangle collider;
 };
-Bullet bullet_array[maxBullets];  // ye array hai taake zada bullets store ho sakein
+Bullet bullet_array[maxBullets];  
 
 struct Enemy {
     Vector2 position;
     Texture2D texture;
     Image img;
-    Vector2 speed;
-    int Width = 135;
-    int Height = 150;
+    float speed =5.0f;
+    int width = 60;
+    int height = 90;
     int health ;
     bool isAlived ;
+    Rectangle collider;
 };
-Enemy soldierEnemy[maxSoldierEnemy];  //// ye array hai taake zada enemy store ho sakein
+Enemy soldierEnemy[maxSoldierEnemy];  
 
 void movement(Player* player, int key)
 {
@@ -84,7 +88,7 @@ void jumpHandle(Player* player) {
     }
 }
 
-//ye us true value ke liye work karta hai
+
 void fireHandle(Bullet* bullet) {
     if (bullet->isFired) {
         if (bullet->direction == 0) { // Move right
@@ -109,7 +113,6 @@ void fireHandle(Bullet* bullet) {
         }
     }
 }
-// ye function sirf us bullet ko true karta hai
 void shootBullet(int direction) {
     for (int i = 0; i < maxBullets; i++) {
         if (!bullet_array[i].isFired) {
@@ -120,6 +123,7 @@ void shootBullet(int direction) {
         }
     }
 }
+
 // ye function main menu ke liye hai
 bool mainMenu(Texture2D background,Sound Menu)
 {
@@ -164,6 +168,21 @@ void initillizeBullet(Player player) {
 
 }
 
+void initillizeSoldierEnemy() {
+
+    for (int i = 0; i < maxSoldierEnemy; i++) {
+        soldierEnemy[i].img = LoadImage("x64/Debug/enemy.png");
+        ImageResize(&soldierEnemy[i].img, soldierEnemy[i].width, soldierEnemy[i].height);
+        soldierEnemy[i].texture = LoadTextureFromImage(soldierEnemy[i].img);
+
+        soldierEnemy[i].position = { screenWidth, 857 };
+        soldierEnemy[i].health = 100;
+        soldierEnemy[i].isAlived = false;
+
+    }
+
+}
+
 void updateBullet(Player player) {
     for (int i = 0; i < maxBullets; i++) {
         if (!bullet_array[i].isFired) {
@@ -175,8 +194,47 @@ void updateBullet(Player player) {
         }
     }
 }
+void updatePosition(Rectangle& playercollider , Player& player) {
+    playercollider.x = player.position.x;
+    playercollider.y = player.position.y;
+}
 
-void drawAllTextures(Texture2D backGround , Rectangle playercollider , Player player) {
+void UpdateEnemies() {
+
+    spawnTimer += GetFrameTime();
+
+    if (spawnTimer >= spawnInterval) {
+        for (int i = 0; i < maxSoldierEnemy; i++) {
+            if (!soldierEnemy[i].isAlived) {
+             
+                soldierEnemy[i].isAlived = true;
+                soldierEnemy[i].speed = 5;
+                soldierEnemy[i].health = 100;
+      
+                spawnTimer = 0.0f;
+                break; 
+            }
+        }
+    }
+
+    for (int i = 0; i < maxSoldierEnemy; i++) {
+        if (soldierEnemy[i].isAlived) {
+           
+            if(soldierEnemy[i].position.x > GetRandomValue(screenWidth / 2, screenWidth - 1))
+               soldierEnemy[i].position.x -= soldierEnemy[i].speed;
+         
+                 soldierEnemy[i].collider.x = soldierEnemy[i].position.x;
+                 soldierEnemy[i].collider.y = soldierEnemy[i].position.y;
+
+           /* else if (soldierEnemy[i].position.x < GetRandomValue(screenWidth / 2, screenWidth - 1))
+                soldierEnemy[i].position.x += soldierEnemy[i].speed;*/
+
+        }
+    }
+}
+
+
+void drawAllTextures(Texture2D backGround, Rectangle playercollider, Player player) {
 
     ClearBackground(RAYWHITE);
     DrawTexture(backGround, 0, 0, WHITE);
@@ -192,13 +250,15 @@ void drawAllTextures(Texture2D backGround , Rectangle playercollider , Player pl
                 , 13, 13, RED);
         }
     }
+
     DrawTexture(player.texture, player.position.x, player.position.y, WHITE);
-
-}
-
-void updatePosition(Rectangle& playercollider , Player& player) {
-    playercollider.x = player.position.x;
-    playercollider.y = player.position.y;
+    //enemy hande
+    for (int i = 0; i < maxSoldierEnemy; i++) {
+        if (soldierEnemy[i].isAlived) {
+            DrawTexture(soldierEnemy[i].texture, (int)soldierEnemy[i].position.x, (int)soldierEnemy[i].position.y, WHITE);
+            DrawRectangleLines(soldierEnemy[i].collider.x, soldierEnemy[i].collider.y, soldierEnemy[i].width, soldierEnemy[i].height, PURPLE);
+        }
+    }
 }
 
 int main()
@@ -208,7 +268,7 @@ int main()
     Enemy enemy;
     Bullet bullet;
     Rectangle playercollider = {player.position.x , player.position.y , player.playerWidth , player.playerHeight};
- 
+    
 
     InitWindow(screenWidth, screenHeight, "METAL SLUG");
     InitAudioDevice();
@@ -222,6 +282,8 @@ int main()
     Sound menu = LoadSound("x64/Debug/Menu.mp3");
 
     initillizeBullet(player);
+
+    initillizeSoldierEnemy();
 
     if (!mainMenu(backGround,menu))
     {
@@ -260,6 +322,8 @@ int main()
                 bullet_array[i].collider.y = bullet_array[i].position.y;
             }
             //-------------------------------------------------------------
+
+            UpdateEnemies();
 
             updatePosition(playercollider, player);
             jumpHandle(&player);
