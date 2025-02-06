@@ -538,9 +538,6 @@ int main()
                 fire();
                 coolDown = 6;
             }
-            else
-                player.isShooting = false;
-          
             shootBulletEnemy();
         
 
@@ -568,7 +565,7 @@ int main()
 
             BeginDrawing();
 
-            drawAllTextures(backGround, playercollider, helicoptercollider, helicopter);
+            drawAllTextures(backGround, playercollider, helicoptercollider, helicopter,player);
             DrawTexture(player.texture[player.moveProgress], player.position.x, player.position.y, WHITE);
          
            
