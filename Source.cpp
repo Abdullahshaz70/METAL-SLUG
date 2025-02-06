@@ -2,6 +2,9 @@
 #include<conio.h>
 #include<math.h>
 #include<iostream>
+#include<fstream>
+#include <string>
+
 const int screenWidth = 1280;
 const int screenHeight = 960;
 
@@ -14,15 +17,18 @@ float spawnTimer = 0.0f;
 float spawnInterval = 5.0f;
 int currentEnemyIndex = 0;
 
-int animationFrameCounter = 0;
-const int animationSpeed = 6;
+int movingAnimationFrameCounter = 0;
+const int moveAnimationSpeed = 6;
+int shootingAnimationFrameCounter = 0;
+const int shootAnimtaionSpeed = 4;
 
 
 struct Player {
     Vector2 position;
     Texture2D texture[13];
     Image img[13];
-
+    Texture2D Shooting[8];
+    int shootingCount = 0;
     int playerWidth = 60;
     int playerHeight = 90;
     float speed = 5.0f;
@@ -31,7 +37,8 @@ struct Player {
     int MAX_JUMP = 65;
     int jumpProgress = 0;
     int moveProgress = 0;
-    bool isMoving = false;  
+    bool isMoving = false; 
+    bool isShooting = false;
 };
 struct Bullet {
     Vector2 position = { 50,50 };
@@ -72,6 +79,17 @@ struct Helicopter {
 
 };
 
+void shootingPlayerInitialize(Player& player)
+{
+    player.Shooting[0] = LoadTexture("Assets/PlayerShooting/0.png");
+    player.Shooting[1] = LoadTexture("Assets/PlayerShooting/1.png");
+    player.Shooting[2] = LoadTexture("Assets/PlayerShooting/2.png");
+    player.Shooting[3] = LoadTexture("Assets/PlayerShooting/3.png");
+    player.Shooting[4] = LoadTexture("Assets/PlayerShooting/4.png");
+    player.Shooting[5] = LoadTexture("Assets/PlayerShooting/5.png");
+    player.Shooting[6] = LoadTexture("Assets/PlayerShooting/6.png");
+    player.Shooting[7] = LoadTexture("Assets/PlayerShooting/7.png");
+}
 void initillizePlayer(Player& player) {
     player.position.x = 5;
     player.position.y = 850;
@@ -111,6 +129,7 @@ void initillizePlayer(Player& player) {
     player.texture[9] = LoadTextureFromImage(player.img[9]);
     player.texture[10] = LoadTextureFromImage(player.img[10]);
     player.texture[11] = LoadTextureFromImage(player.img[11]);
+    shootingPlayerInitialize(player);
 }
 void initillizeBullet(Player player) {
     for (int i = 0; i < maxBullets; i++) {
@@ -265,7 +284,7 @@ void fire()
     else
         shootBullet(0);
 }
-void fireDraw()
+void fireDraw(Player& player)
 {
     for (int i = 0; i < maxBullets; i++) {
         if (bullet_array[i].isFired) {
@@ -283,6 +302,8 @@ void enemyfireDraw()
             DrawRectangleLines((enemyBullet_array[i].collider.x + enemyBullet_array[i].width / 2) - 13, (enemyBullet_array[i].collider.y + enemyBullet_array[i].height / 2) - 13, 13, 13, GREEN);
         }
     }
+    if(player.isShooting)
+        DrawTexture(player.Shooting[player.shootingCount++], player.position.x, player.position.y, WHITE);
 }
 
 
@@ -330,8 +351,6 @@ bool mainMenu(Texture2D background, Sound Menu)
     }
     return true;
 }
-
-
 bool movement(Player* player, int key)
 {
    
@@ -381,22 +400,44 @@ void updatePosition(Rectangle& playercollider, Player& player) {
     playercollider.y = player.position.y;
 }
 void updatePlayerAnimation(Player& player) {
-    animationFrameCounter++;
+    movingAnimationFrameCounter++;
     if (player.isMoving)
     {
-        if (animationFrameCounter >= animationSpeed) {
+        if (movingAnimationFrameCounter >= moveAnimationSpeed) {
             player.moveProgress++;
             if (player.moveProgress > 11)
                 player.moveProgress = 0;
-            animationFrameCounter = 0;
+            movingAnimationFrameCounter = 0;
         }
-        player.isMoving = false;
+        else
+            player.isMoving = false;
     }
     else
     {
         player.moveProgress = 0;
-        animationFrameCounter = 0;
+        movingAnimationFrameCounter = 0;
     }
+}
+void updateShootingAnimation(Player& player)
+{
+    shootingAnimationFrameCounter++;
+    if (player.isShooting)
+    {
+        if (shootingAnimationFrameCounter >= shootAnimtaionSpeed)
+        {
+            player.shootingCount++;
+            if (player.shootingCount > 7)
+                player.shootingCount = 0;
+            shootingAnimationFrameCounter = 0;
+        }
+        else
+            player.isShooting = false;
+    }
+        else
+        {
+            player.shootingCount = 0;
+            shootingAnimationFrameCounter = 0;
+        }
 }
 
 void moveOutsideScreen(Player& player)
@@ -417,8 +458,6 @@ void moveOutsideScreen(Player& player)
     }
 
 }
-
-
 void UpdateEnemies() {
 
 
@@ -468,26 +507,19 @@ void UpdateEnemies() {
 }
 
 
+
 void drawAllTextures(Texture2D backGround, Rectangle playercollider ,
-    Rectangle helicoptercollider , Helicopter helicopter) {
+    Rectangle helicoptercollider , Helicopter helicopter,Player& player) {
 
     ClearBackground(RAYWHITE);
     DrawTexture(backGround, 0, 0, WHITE);
     DrawRectangleLines(playercollider.x, playercollider.y, playercollider.width, playercollider.height, GREEN);
-
     fireDraw();
     enemyDrawing();
-    //enemyfireDraw();
-   
-    for (int i = 0; i < maxBullets; i++) {
-        if (enemyBullet_array[i].isFired) {
-            DrawTexture(enemyBullet_array[i].texture, enemyBullet_array[i].position.x, enemyBullet_array[i].position.y, WHITE);
-            DrawRectangleLines((enemyBullet_array[i].collider.x + enemyBullet_array[i].width / 2) - 13, (enemyBullet_array[i].collider.y + enemyBullet_array[i].height / 2) - 13, 13, 13, GREEN);
-        }
-    }
-    //DrawRectangleLines(helicoptercollider.x, helicoptercollider.y, helicoptercollider.width, helicoptercollider.height, GREEN);
-  /*  if (ENEMY <= 0)
-        DrawTexture(helicopter.texture, helicopter.position.x, helicopter.position.y, WHITE);*/
+    DrawRectangleLines(helicoptercollider.x, helicoptercollider.y, helicoptercollider.width, helicoptercollider.height, GREEN);
+
+    if (ENEMY <= 0)
+        DrawTexture(helicopter.texture, helicopter.position.x, helicopter.position.y, WHITE);
 
 }
 
@@ -544,7 +576,10 @@ int main()
             if (IsKeyDown(KEY_X) and coolDown <= 0) {
                 fire();
                 coolDown = 6;
+                player.isShooting = true;
             }
+            else
+                player.isShooting = false;
           
             shootBulletEnemy();
         
@@ -558,6 +593,7 @@ int main()
 
 
             updatePlayerAnimation(player);
+            updateShootingAnimation(player);
             jumpHandle(&player);
 
             for (int i = 0; i < maxBullets; i++) 
@@ -572,8 +608,8 @@ int main()
           
 
             BeginDrawing();
-
-            drawAllTextures(backGround, playercollider , helicoptercollider , helicopter);
+            drawAllTextures(backGround, playercollider , helicoptercollider , helicopter,player);
+            if(!player.isShooting)
             DrawTexture(player.texture[player.moveProgress], player.position.x, player.position.y, WHITE);
          
            

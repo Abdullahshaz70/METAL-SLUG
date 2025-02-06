@@ -146,6 +146,9 @@
     <Image Include="x64\Debug\Mission 1 &amp; 2\BG1.png" />
     <Image Include="x64\Debug\player.png" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="PlayerShooting.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
