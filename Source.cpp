@@ -544,7 +544,7 @@ int main()
                 coolDown--;
             if (IsKeyDown(KEY_X) and coolDown <= 0) {
                 fire();
-                coolDown = 10;
+                coolDown = 6;
             }
 
             if (coolDown1 > 0)
