@@ -2,6 +2,8 @@
 #include<conio.h>
 #include<math.h>
 #include<iostream>
+#include <string>
+
 const int screenWidth = 1280;
 const int screenHeight = 960;
 const int maxBullets = 30;
@@ -13,6 +15,7 @@ struct Player {
     Vector2 position;
     Texture2D texture[13];
     Image img[13];
+    Texture2D Shooting[8];
 
     int playerWidth = 60;
     int playerHeight = 90;

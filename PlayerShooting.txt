@@ -1,0 +1,8 @@
+Assets/PlayerShooting/0.png
+Assets/PlayerShooting/1.png
+Assets/PlayerShooting/2.png
+Assets/PlayerShooting/3.png
+Assets/PlayerShooting/4.png
+Assets/PlayerShooting/5.png
+Assets/PlayerShooting/6.png
+Assets/PlayerShooting/7.png
